@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>AMA</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+    <script src="config.js"></script> <!-- Include the Firebase config -->
+    <script src="script.js"></script> <!-- Your chatbot JavaScript -->    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        #container {
+            text-align: center;
+            background-color: #333;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        #header {
+            font-size: 28px; /* Increased font size */
+            margin-top: -200px; /* This moves everything higher??? */
+        }
+        #inputBox {
+            width: 400px;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 20px;
+            background-color: #444;
+            color: #fff;
+        }
+        #output {
+            margin-top: 20px;
+            width: 400px;
+            min-height: 100px;
+            max-height: 100px;
+            overflow-y: auto; /* Add a vertical scroll bar when content overflows */
+            padding: 10px;
+            border: 1px solid #777;
+            border-radius: 20px;
+            background-color: #444;
+            color: #fff;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="header">
+            🤖  AMA 🤖
+
+        </div>
+        <input type="text" id="inputBox" placeholder="Ask me anything!" style="text-align: center;">
+        <br>
+        <div id="output"></div>
+    </div>
+
+    <script>
+    
+        // DOM Elements
+        const inputBox = document.getElementById('inputBox');
+        const outputDiv = document.getElementById('output');
+
+        // Event listener for user input
+        inputBox.addEventListener('keyup', function (e) {
+            if (e.key === 'Enter') {
+                const userInput = inputBox.value;
+                inputBox.value = ''; // Clear the input box
+
+                if (!apiKey || apiKey.trim() === '') {
+                    outputDiv.innerHTML = 'Error: Please provide a valid API key.';
+                    return;
+                }
+
+                fetch('https://api.openai.com/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: 'gpt-3.5-turbo',
+                        messages: [
+                            {
+                                role: 'system',
+                                content: 'You are a chatbot.'
+                            },
+                            {
+                                role: 'user',
+                                content: userInput
+                            }
+                        ]
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const chatbotResponse = data.choices[0].message.content;
+                    outputDiv.innerHTML = chatbotResponse;
+                })
+                .catch(error => {
+                    console.error('API Request Error:', error);
+                    outputDiv.innerHTML = 'Error: Failed to connect to the API. Please try again later.';
+                });
+            }
+        });
+    </script>
+</body>
+</html>
